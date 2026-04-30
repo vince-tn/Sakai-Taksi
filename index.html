@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sakai — Driver-First Taxi Booking</title>
+
+  <style>
+    /* =========================================================
+      01. FONT
+    ========================================================= */
+    @font-face {
+      font-family: "Cubao Wide";
+      src:
+        url("assets/fonts/Cubao_Free_Wide.ttf") format("truetype"),
+        url("assets/fonts/Cubao_Free_Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Cubao Regular";
+      src: url("assets/fonts/Cubao_Free_Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Cubao Narrow";
+      src: url("assets/fonts/Cubao_Free_Narrow.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* =========================================================
+      02. VARIABLES
+    ========================================================= */
+    :root{
+      --yellow:#f6c400;
+      --yellow-deep:#e5ad00;
+      --red:#e6524b;
+      --red-deep:#cf433d;
+      --blue:#2d84f4;
+      --cream:#f5edd5;
+      --cream-2:#efe4c2;
+      --paper:#fff8e7;
+      --charcoal:#1f1f1f;
+      --black:#111111;
+      --white:#ffffff;
+      --muted:#5f5748;
+      --green:#41a960;
+
+      --display:"Cubao Wide", "Cubao Regular", Impact, Haettenschweiler, "Arial Black", sans-serif;
+      --display-regular:"Cubao Regular", Impact, Haettenschweiler, "Arial Black", sans-serif;
+      --display-narrow:"Cubao Narrow", "Arial Narrow", Impact, sans-serif;
+      --body:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+
+    /* =========================================================
+      03. RESET / BASE
+    ========================================================= */
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family:var(--body);
+      color:var(--black);
+      background:var(--cream);
+      overflow-x:hidden;
+    }
+
+    img{
+      max-width:100%;
+      display:block;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input,
+    select,
+    textarea{
+      font:inherit;
+    }
+
+    .container{
+      width:min(1180px, calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .sr-only{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    section{
+      position:relative;
+      padding:82px 0;
+      overflow:hidden;
+    }
+
+    .bg-cream{
+      background:
+        linear-gradient(rgba(17,17,17,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.07) 1px, transparent 1px),
+        linear-gradient(180deg, var(--cream) 0%, #f7efd9 100%);
+      background-size:54px 54px, 54px 54px, auto;
+    }
+
+    .bg-red{
+      background:var(--red);
+    }
+
+    .bg-yellow{
+      background:linear-gradient(180deg, #f6ca3f 0%, var(--yellow) 100%);
+    }
+
+    .bg-paper{
+      background:var(--paper);
+    }
+
+    .pattern-dots::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:radial-gradient(rgba(17,17,17,.28) 1.3px, transparent 1.3px);
+      background-size:16px 16px;
+      opacity:.35;
+    }
+
+    .pattern-light-dots::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:radial-gradient(rgba(17,17,17,.18) 1.2px, transparent 1.2px);
+      background-size:18px 18px;
+      opacity:.28;
+    }
+
+    .pattern-grid::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(rgba(17,17,17,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,17,17,.06) 1px, transparent 1px);
+      background-size:54px 54px;
+    }
+
+    .section-head{
+      display:grid;
+      gap:16px;
+      margin-bottom:30px;
+      position:relative;
+      z-index:1;
+    }
+
+    .section-kicker{
+      font-size:.78rem;
+      font-weight:750;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--red-deep);
+    }
+
+    .section-title{
+      font-family:var(--display);
+      text-transform:uppercase;
+      line-height:.9;
+      letter-spacing:.01em;
+      font-size:clamp(2.2rem, 4.4vw, 4.6rem);
+      transform:rotate(-1.2deg);
+      width:fit-content;
+      font-weight:400;
+    }
+
+    .section-title .blue{
+      color:var(--blue);
+      -webkit-text-stroke:1.5px var(--black);
+      text-shadow:2px 2px 0 var(--white), 4px 4px 0 var(--black);
+    }
+
+    .section-title .red{
+      color:var(--red);
+      -webkit-text-stroke:1.5px var(--black);
+      text-shadow:2px 2px 0 var(--yellow), 4px 4px 0 var(--black);
+    }
+
+    .section-title .dark{
+      color:var(--black);
+      font-size:clamp(2rem, 4vw, 4.2rem);
+      text-shadow:2px 2px 0 rgba(255,255,255,.35);
+    }
+
+    .section-desc{
+      max-width:630px;
+      line-height:1.65;
+      font-size:.96rem;
+      font-weight:600;
+      color:var(--muted);
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:10px 20px;
+      border:3px solid var(--black);
+      border-radius:999px;
+      font-weight:850;
+      font-size:.9rem;
+      background:var(--white);
+      box-shadow:5px 5px 0 var(--black);
+      transition:.15s ease;
+      cursor:pointer;
+    }
+
+    .btn:hover{
+      transform:translate(2px,2px);
+      box-shadow:3px 3px 0 var(--black);
+    }
+
+    .btn-primary{
+      background:var(--yellow);
+    }
+
+    .btn-red{
+      background:var(--red);
+      color:var(--white);
+    }
+
+    .btn-white{
+      background:var(--white);
+      color:var(--black);
+    }
+
+    .card{
+      border:4px solid var(--black);
+      border-radius:24px;
+      background:var(--white);
+      box-shadow:7px 7px 0 var(--black);
+    }
+
+    .reveal{
+      opacity:0;
+      transform:translateY(24px);
+      transition:opacity .55s ease, transform .55s ease;
+    }
+
+    .reveal.visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* =========================================================
+      04. HEADER
+    ========================================================= */
+    .site-header{
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:rgba(245,237,213,.95);
+      backdrop-filter:blur(8px);
+      border-bottom:3px solid var(--black);
+    }
+
+    .site-header-inner{
+      min-height:78px;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      align-items:center;
+      gap:22px;
+    }
+
+    .brand{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width:max-content;
+    }
+
+    .brand img{
+      width:58px;
+      height:auto;
+      object-fit:contain;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      font-family:var(--display);
+      text-transform:uppercase;
+      line-height:.78;
+      letter-spacing:.02em;
+      font-size:1.15rem;
+      transform:rotate(-2deg);
+    }
+
+    .brand-text span:first-child{
+      color:var(--black);
+      text-shadow:1.5px 1.5px 0 var(--yellow);
+    }
+
+    .brand-text span:last-child{
+      color:var(--yellow);
+      -webkit-text-stroke:1px var(--black);
+      text-shadow:2px 2px 0 var(--black);
+    }
+
+    .main-nav{
+      display:flex;
+      justify-content:center;
+    }
+
+    .main-nav ul{
+      list-style:none;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:28px;
+    }
+
+    .main-nav a{
+      position:relative;
+      font-weight:800;
+      font-size:.92rem;
+      padding:4px 2px;
+    }
+
+    .main-nav a::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-8px;
+      width:0;
+      height:3px;
+      margin:auto;
+      background:var(--black);
+      transition:width .2s ease;
+    }
+
+    .main-nav a:hover::after{
+      width:100%;
+    }
+
+    .main-cta{
+      display:flex;
+      justify-content:flex-end;
+    }
+
+    .header-cta{
+      min-width:140px;
+    }
+
+    /* =========================================================
+      05. HERO
+    ========================================================= */
+    .hero{
+      position: relative;
+      overflow: hidden;
+      padding:84px 0 78px;
+      background-image:
+  
+        url('assets/herobg.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      align-items: center;
+      display: flex;
+    }
+    .hero::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("assets/hero-bg.png");
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      opacity: 0.22;
+      z-index: 0;
+    }
+
+    .hero > .container{
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:44px;
+      align-items:center;
+      position:relative;
+      z-index:1;
+    }
+
+    .hero-title{
+      font-family:var(--display);
+      text-transform:uppercase;
+      line-height:.82;
+      letter-spacing:.01em;
+      font-size:clamp(4.1rem, 10vw, 9rem);
+      margin-bottom:16px;
+      width:fit-content;
+    }
+
+    .hero-title .tara{
+      display:block;
+      color:var(--blue);
+      -webkit-text-stroke:2px var(--black);
+      text-shadow:3px 3px 0 var(--white), 6px 6px 0 var(--black);
+      transform:rotate(-3deg);
+      transform-origin:left center;
+    }
+
+    .hero-title .sakai{
+      display:inline-block;
+      color:var(--red);
+      -webkit-text-stroke:2px var(--black);
+      text-shadow:3px 3px 0 var(--yellow), 6px 6px 0 var(--black);
+      transform:rotate(-1deg);
+      transform-origin:left center;
+    }
+
+    .hero-copy{
+      max-width:570px;
+      font-size:1rem;
+      line-height:1.45;
+      font-weight:750;
+      margin-bottom:26px;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+
+    .hero-art{
+      position:relative;
+      min-height:520px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:visible;
+    }
+
+    .hero-orbit{
+      position:absolute;
+      border-radius:50%;
+      pointer-events:none;
+    }
+
+    .hero-orbit.one{
+      width:min(600px, 104%);
+      height:min(600px, 104%);
+      border:4px solid rgba(246,196,0,.9);
+      border-left-color:transparent;
+      border-bottom-color:rgba(246,196,0,.2);
+      transform:rotate(-18deg);
+      z-index:0;
+    }
+
+    .hero-orbit.two{
+      width:min(510px, 90%);
+      height:min(510px, 90%);
+      border:3px dashed rgba(17,17,17,.24);
+      transform:rotate(12deg);
+      z-index:0;
+    }
+
+    .hero-circle-yellow{
+      position:absolute;
+      width:min(440px, 80%);
+      height:min(440px, 80%);
+      border-radius:50%;
+      background:radial-gradient(circle at 48% 36%, #ffe36c 0%, var(--yellow) 65%, #eca600 100%);
+      z-index:1;
+    }
+
+    .hero-circle-black{
+      position:absolute;
+      width:112px;
+      height:112px;
+      border-radius:50%;
+      background:var(--charcoal);
+      border:4px solid var(--black);
+      top:40px;
+      right:80px;
+      z-index:1;
+      box-shadow:6px 6px 0 rgba(246,196,0,.45);
+    }
+
+    .hero-dot{
+      position:absolute;
+      border-radius:50%;
+      background:var(--yellow);
+      border:3px solid var(--black);
+      box-shadow:4px 4px 0 rgba(0,0,0,.14);
+      z-index:1;
+    }
+
+    .hero-dot.d1{ width:52px; height:52px; top:68px; left:38px; }
+    .hero-dot.d2{ width:24px; height:24px; top:24px; left:156px; }
+    .hero-dot.d3{ width:22px; height:22px; top:92px; right:44px; }
+    .hero-dot.d4{ width:40px; height:40px; bottom:66px; left:70px; }
+
+    .hero-image{
+      position:relative;
+      z-index:2;
+      width:min(560px, 106%);
+      transform:translateY(12px);
+    }
+
+    /* =========================================================
+      06. WHY / PAIN SPLIT
+    ========================================================= */
+    .why-section{
+      padding:82px 0;
+    }
+
+    .why-layout{
+      display:grid;
+      grid-template-columns:.85fr 1.15fr;
+      gap:34px;
+      align-items:start;
+      position:relative;
+      z-index:1;
+    }
+
+    .why-copy{
+      align-self:start;
+    }
+
+    .why-visual-wrap{
+      position:relative;
+      min-height:390px;
+      display:flex;
+      align-items:flex-end;
+    }
+
+    .why-driver-art{
+      position:absolute;
+      top:0;
+      left:0;
+      width:min(470px, 100%);
+      z-index:1;
+      object-fit:contain;
+    }
+
+    .why-main-title{
+      position:relative;
+      z-index:2;
+      width:fit-content;
+      margin-top:118px;
+      font-family:var(--display);
+      text-transform:uppercase;
+      line-height:.88;
+      letter-spacing:.01em;
+      font-size:clamp(2.9rem, 5.4vw, 5.1rem);
+      font-weight:400;
+    }
+
+    .why-main-title span{
+      display:block;
+    }
+
+    .why-main-title .blue{
+      color:var(--blue);
+      -webkit-text-stroke:1.8px var(--black);
+      text-shadow:2px 2px 0 var(--white), 4px 4px 0 var(--black);
+    }
+
+    .why-main-title .red{
+      color:var(--red);
+      -webkit-text-stroke:1.8px var(--black);
+      text-shadow:2px 2px 0 var(--yellow), 4px 4px 0 var(--black);
+    }
+
+    .why-short-copy{
+      margin-top:10px;
+      max-width:440px;
+      font-size:.92rem;
+      line-height:1.5;
+      font-weight:700;
+      color:var(--muted);
+    }
+
+    .pain-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .plate-card{
+      position:relative;
+      background:#f3f1eb;
+      border:3px solid var(--black);
+      border-radius:26px;
+      box-shadow:5px 5px 0 var(--black);
+      padding:26px 24px 22px;
+      min-height:205px;
+      overflow:hidden;
+    }
+
+    .plate-card::before{
+      content:"";
+      position:absolute;
+      inset:12px;
+      border:2px dashed rgba(17,17,17,.18);
+      border-radius:18px;
+      pointer-events:none;
+    }
+
+    .plate-card-wide{
+      grid-column:span 2;
+      min-height:unset;
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      gap:22px;
+      align-items:center;
+      padding:28px 24px 24px;
+    }
+
+    .plate-card-yellow{
+      background:var(--yellow);
+    }
+
+    .plate-bolt{
+      position:absolute;
+      width:14px;
+      height:14px;
+      border:2px solid var(--black);
+      background:#f9f7ef;
+      border-radius:50%;
+      z-index:2;
+    }
+
+    .bolt-tl{ top:12px; left:12px; }
+    .bolt-tr{ top:12px; right:12px; }
+    .bolt-bl{ bottom:12px; left:12px; }
+    .bolt-br{ bottom:12px; right:12px; }
+
+    .plate-num{
+      position:absolute;
+      top:12px;
+      right:26px;
+      z-index:2;
+      font-family:var(--display);
+      font-size:2rem;
+      line-height:1;
+      color:#f4d95f;
+      -webkit-text-stroke:1.3px var(--black);
+      text-shadow:2px 2px 0 rgba(255,255,255,.35);
+      font-weight:400;
+    }
+
+    .plate-card h3{
+      position:relative;
+      z-index:2;
+      max-width:74%;
+      margin:0 0 10px;
+      font-family:var(--display);
+      text-transform:uppercase;
+      font-size:clamp(1.35rem, 2vw, 2.05rem);
+      line-height:.95;
+      letter-spacing:-.01em;
+      color:var(--black);
+      font-weight:400;
+    }
+
+    .plate-card p{
+      position:relative;
+      z-index:2;
+      max-width:78%;
+      margin:0;
+      font-size:.9rem;
+      line-height:1.45;
+      font-weight:650;
+      color:var(--muted);
+    }
+
+    .plate-wide-copy h3{
+      max-width:560px;
+      margin-bottom:12px;
+      font-size:clamp(1.2rem, 2.2vw, 2.5rem);
+      line-height:.9;
+    }
+
+    .plate-wide-copy p{
+      max-width:460px;
+      font-size:.92rem;
+      line-height:1.5;
+    }
+
+    .pill-stack-plate{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .pill-stack-plate span{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      padding:10px 18px;
+      border:3px solid var(--black);
+      border-radius:999px;
+      background:#f4f3ef;
+      box-shadow:4px 4px 0 var(--black);
+      font-size:.9rem;
+      font-weight:850;
+      text-align:center;
+    }
+
+    /* =========================================================
+      07. RED FEATURE POSTER
+    ========================================================= */
+    .poster-wrap{
+      position:relative;
+      z-index:1;
+    }
+
+    .poster-frame{
+      width:min(900px, 100%);
+      margin:0 auto;
+      padding:26px;
+      background:#d94741;
+      position:relative;
+    }
+
+    .poster-frame::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:radial-gradient(rgba(17,17,17,.22) 1.1px, transparent 1.1px);
+      background-size:12px 12px;
+      opacity:.35;
+    }
+
+    .poster-inner{
+      position:relative;
+      z-index:1;
+      padding:32px;
+      background:#ef6a63;
+    }
+
+    .poster-head{
+      text-align:center;
+      margin-bottom:28px;
+    }
+
+    .poster-head h2{
+      font-family:var(--display);
+      color:var(--white);
+      font-size:clamp(1.9rem, 3.6vw, 3.6rem);
+      line-height:.92;
+      text-transform:uppercase;
+      margin-bottom:6px;
+      font-weight:400;
+    }
+
+    .poster-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:16px;
+    }
+
+    .poster-card{
+      background:#fff5df;
+      border:3px solid var(--black);
+      padding:18px;
+      min-height:218px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .poster-icon{
+      width:52px;
+      height:52px;
+      display:grid;
+      place-items:center;
+      border:3px solid var(--black);
+      border-radius:16px;
+      background:var(--yellow);
+      box-shadow:4px 4px 0 var(--black);
+      margin-bottom:14px;
+      font-size:1.25rem;
+    }
+
+    .poster-card:nth-child(2) .poster-icon,
+    .poster-card:nth-child(5) .poster-icon{
+      background:var(--blue);
+      color:var(--white);
+    }
+
+    .poster-card:nth-child(3) .poster-icon,
+    .poster-card:nth-child(6) .poster-icon{
+      background:var(--red);
+      color:var(--white);
+    }
+
+    .poster-card h3{
+      font-family:var(--body);
+      font-size:1.1rem;
+      line-height:1;
+      margin-bottom:10px;
+      text-transform:uppercase;
+      font-weight:900;
+      letter-spacing:-0.03em;
+    }
+
+    .poster-card p{
+      color:var(--muted);
+      line-height:1.45;
+      font-size:.88rem;
+      font-weight:600;
+      margin-bottom:12px;
+    }
+
+    .poster-meta{
+      margin-top:auto;
+      display:grid;
+      gap:6px;
+      font-size:.78rem;
+      font-weight:750;
+      line-height:1.35;
+    }
+
+    .poster-cta{
+      display:flex;
+      justify-content:center;
+      margin-top:24px;
+    }
+
+    .poster-cta .btn{
+      min-width:180px;
+    }
+
+    /* =========================================================
+      SECTION 04: APP SCREENSHOTS SHOWCASE
+    ========================================================= */
+    .app-showcase-section{
+      padding: 88px 0 96px;
+      background: #f6f0df;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-showcase-head{
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      margin-bottom: 34px;
+    }
+
+    .app-preview-kicker{
+      display: inline-block;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      color: #ef4f43;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================
+      TRAFFIC TITLE
+    ========================================================= */
+    .traffic-title{
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .traffic-word{
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .traffic-signal{
+      width: 52px;
+      height: 24px;
+      border: 3px solid #111111;
+      border-radius: 999px;
+      background: #1d1d1d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 4px 4px 0 #111111;
+    }
+
+    .traffic-dot{
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #111111;
+      display: block;
+    }
+
+    .traffic-dot.red{
+      background: #ef4f43;
+    }
+
+    .traffic-dot.yellow{
+      background: #f5c515;
+    }
+
+    .traffic-dot.green{
+      background: #3bb44a;
+    }
+
+    .traffic-text{
+      display: inline-block;
+      font-family: var(--display) !important;
+      font-size: clamp(2.6rem, 6vw, 4.6rem);
+      line-height: 0.9;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      -webkit-text-stroke: 1.5px #111111;
+      text-shadow:
+        3px 3px 0 #f5c515,
+        4px 4px 0 #111111;
+    }
+
+    .traffic-text.signal-red{
+      color:#ef4f43;
+      -webkit-text-stroke:1.5px #111111;
+      text-shadow:
+        2px 2px 0 #ffffff,
+        4px 4px 0 #111111;
+    }
+
+    .traffic-text.signal-yellow{
+      color:#f5c515;
+      -webkit-text-stroke:1.5px #111111;
+      text-shadow:
+        2px 2px 0 #ffffff,
+        4px 4px 0 #111111;
+    }
+
+    .traffic-text.signal-green{
+      color:#3bb44a;
+      -webkit-text-stroke:1.5px #111111;
+      text-shadow:
+        2px 2px 0 #ffffff,
+        4px 4px 0 #111111;
+    }
+
+    .traffic-book .traffic-text{
+      transform: rotate(-1.5deg);
+    }
+
+    .traffic-choose .traffic-text{
+      transform: rotate(1deg);
+    }
+
+    .traffic-ride .traffic-text{
+      transform: rotate(-1deg);
+    }
+    .dark-exclamation{
+      color:#4c4c4c !important;
+    }
+
+    /* =========================================================
+      SCREENSHOTS ROW
+    ========================================================= */
+    .app-screens-row{
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 28px;
+      padding: 14px 8px 20px;
+    }
+
+    .app-screens-four{
+      overflow: visible;
+    }
+
+    .app-screen-card{
+      flex: 0 0 270px;
+      background: #ffffff;
+      border: 4px solid #111111;
+      border-radius: 34px;
+      box-shadow: 8px 8px 0 #111111;
+      padding: 14px 14px 18px;
+    }
+
+    .app-screen-card:nth-child(1){
+      transform: rotate(-2deg);
+    }
+
+    .app-screen-card:nth-child(2){
+      transform: rotate(1.5deg);
+    }
+
+    .app-screen-card:nth-child(3){
+      transform: rotate(-1.25deg);
+    }
+
+    .app-screen-card:nth-child(4){
+      transform: rotate(1.75deg);
+    }
+
+    .app-screen-card img{
+      width: 100%;
+      aspect-ratio: 9 / 19.5;
+      object-fit: cover;
+      object-position: top center;
+      border: 3px solid #111111;
+      border-radius: 24px;
+      background: #f4f4f4;
+      display: block;
+    }
+
+    .app-screen-card figcaption{
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.98rem;
+      font-weight: 900;
+      color: #111111;
+    }
+
+    /* =========================================================
+      STORE BADGE BUTTONS
+    ========================================================= */
+    .store-buttons{
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 26px;
+    }
+
+    .store-badge-btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 3px solid #111111;
+      border-radius: 16px;
+      background: #000000;
+      box-shadow: 5px 5px 0 #111111;
+      transition: .15s ease;
+      overflow: hidden;
+      text-decoration: none;
+    }
+
+    .store-badge-btn:hover{
+      transform: translate(2px,2px);
+      box-shadow: 3px 3px 0 #111111;
+    }
+
+    .store-badge-btn img{
+      display: block;
+      height: 64px;
+      width: auto;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    /* =========================================================
+      RESPONSIVE
+    ========================================================= */
+    @media (max-width: 1250px){
+      .app-screens-row{
+        justify-content: flex-start;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 22px;
+        scrollbar-width: thin;
+        scrollbar-color: #f5c515 rgba(0,0,0,.12);
+      }
+
+      .app-screens-row::-webkit-scrollbar{
+        height: 12px;
+      }
+
+      .app-screens-row::-webkit-scrollbar-track{
+        background: rgba(0,0,0,.10);
+        border-radius: 999px;
+      }
+
+      .app-screens-row::-webkit-scrollbar-thumb{
+        background: #f5c515;
+        border: 2px solid #111111;
+        border-radius: 999px;
+      }
+
+      .app-screen-card{
+        scroll-snap-align: start;
+        flex-basis: 250px;
+      }
+    }
+
+    @media (max-width: 900px){
+      .traffic-title{
+        gap: 18px;
+      }
+
+      .traffic-text{
+        font-size: clamp(2.2rem, 10vw, 3.4rem);
+      }
+
+      .app-screen-card{
+        flex-basis: 230px;
+      }
+    }
+
+    @media (max-width: 820px){
+      .app-showcase-section{
+        padding: 74px 0 82px;
+      }
+
+      .traffic-title{
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .traffic-text{
+        font-size: clamp(2rem, 10vw, 3rem);
+      }
+
+      .app-screens-row{
+        gap: 20px;
+      }
+
+      .app-screen-card{
+        flex-basis: 210px;
+      }
+
+      .store-buttons{
+        gap: 14px;
+      }
+
+      .store-badge-btn img{
+        height: 58px;
+      }
+    }
+
+    /* =========================================================
+      SECTION 05: BLOGS / STORIES
+    ========================================================= */
+    .blog-section{
+      position:relative;
+      padding:88px 0 78px;
+      background:linear-gradient(180deg, #f7cb38 0%, var(--yellow) 100%);
+      overflow:hidden;
+    }
+
+    .blog-section::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:radial-gradient(rgba(17,17,17,.18) 1.2px, transparent 1.2px);
+      background-size:18px 18px;
+      opacity:.35;
+    }
+
+    .blog-section-head{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:.9fr 1.1fr;
+      gap:28px;
+      align-items:end;
+      margin-bottom:34px;
+    }
+
+    .blog-title{
+      margin-top:8px;
+    }
+
+    .blog-section-copy{
+      max-width:620px;
+      color:#3b3020;
+      font-size:1rem;
+      line-height:1.6;
+      font-weight:700;
+    }
+
+    .blog-grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:24px;
+    }
+
+    .blog-card{
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+      background:#fff8e7;
+      border:4px solid var(--black);
+      border-radius:22px;
+      box-shadow:8px 8px 0 var(--black);
+      overflow:hidden;
+      transform:rotate(-.6deg);
+      transition:.16s ease;
+    }
+
+    .blog-card:nth-child(2){
+      transform:rotate(.5deg);
+    }
+
+    .blog-card:nth-child(3){
+      transform:rotate(-.25deg);
+    }
+
+    .blog-card:hover{
+      transform:translate(2px, 2px) rotate(0deg);
+      box-shadow:5px 5px 0 var(--black);
+    }
+
+    .blog-thumb{
+      display:block;
+      background:#dbe9f2;
+      border-bottom:4px solid var(--black);
+      overflow:hidden;
+    }
+
+    .blog-thumb img{
+      width:100%;
+      aspect-ratio:16 / 9;
+      object-fit:cover;
+      object-position:center;
+      display:block;
+    }
+
+    .blog-content{
+      display:flex;
+      flex-direction:column;
+      flex:1;
+      padding:26px 24px 24px;
+    }
+
+    .blog-meta{
+      width:max-content;
+      margin-bottom:14px;
+      padding:6px 10px;
+      border:3px solid var(--black);
+      border-radius:999px;
+      background:var(--yellow);
+      box-shadow:3px 3px 0 var(--black);
+      color:var(--black);
+      font-size:.72rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .blog-content h3{
+      margin-bottom:16px;
+      color:var(--black);
+      font-family:var(--body);
+      font-size:clamp(1.35rem, 2.1vw, 2rem);
+      line-height:1.15;
+      font-weight:950;
+      letter-spacing:-.035em;
+    }
+
+    .blog-content h3 a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .blog-content p{
+      margin-bottom:24px;
+      color:#3f372d;
+      font-size:.98rem;
+      line-height:1.6;
+      font-weight:600;
+    }
+
+    .blog-link{
+      margin-top:auto;
+      width:max-content;
+      color:var(--blue);
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+      text-decoration:none;
+      position:relative;
+    }
+
+    .blog-link::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-4px;
+      height:3px;
+      background:var(--blue);
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:.16s ease;
+    }
+
+    .blog-link:hover::after{
+      transform:scaleX(1);
+    }
+
+    .blog-nav{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:22px;
+      margin-top:34px;
+    }
+
+    .blog-arrow{
+      width:54px;
+      height:54px;
+      border:3px solid var(--black);
+      border-radius:50%;
+      background:#fff8e7;
+      box-shadow:4px 4px 0 var(--black);
+      color:var(--black);
+      font-size:1.6rem;
+      line-height:1;
+      font-weight:900;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+
+    .blog-arrow:hover{
+      transform:translate(2px,2px);
+      box-shadow:2px 2px 0 var(--black);
+    }
+
+    .blog-dots{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .blog-dots span{
+      width:13px;
+      height:13px;
+      border-radius:50%;
+      background:rgba(17,17,17,.22);
+      border:2px solid rgba(17,17,17,.12);
+    }
+
+    .blog-dots span.active{
+      width:42px;
+      border-radius:999px;
+      background:var(--black);
+      border-color:var(--black);
+    }
+
+    /* =========================================================
+      SECTION: ROAD MARQUEE
+    ========================================================= */
+    .road-marquee-section{
+      position:relative;
+      overflow:hidden;
+      background:#565656;
+      border-top:4px solid var(--black);
+      border-bottom:4px solid var(--black);
+      height:75px !important;
+      min-height:75px !important;
+      max-height:75px !important;
+      padding:0 !important;
+      display:flex;
+      align-items:center;
+    }
+
+    /* road texture / road lane */
+    .road-marquee-section::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(
+          90deg,
+          transparent 0 44px,
+          rgba(255,255,255,.86) 44px 96px,
+          transparent 96px 160px
+        );
+      background-size:210px 8px;
+      background-repeat:repeat-x;
+      background-position:center;
+      height:8px;
+      top:50%;
+      transform:translateY(-50%);
+      opacity:.95;
+      z-index:1;
+    }
+
+    /* subtle asphalt dots */
+    .road-marquee-section::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:radial-gradient(rgba(0,0,0,.16) 1px, transparent 1px);
+      background-size:18px 18px;
+      opacity:.28;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .road-marquee-track{
+      position:relative;
+      z-index:2;
+      display:flex;
+      width:max-content;
+      animation:roadMarqueeDrive 26s linear infinite;
+    }
+
+    .road-marquee-group{
+      display:flex;
+      align-items:center;
+      flex-shrink:0;
+    }
+
+    .road-marquee-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-right:48px;
+      white-space:nowrap;
+      transform:rotate(-1deg);
+    }
+
+    .road-marquee-item:nth-child(even){
+      transform:rotate(1deg);
+    }
+
+    .road-marquee-item img{
+      width:52px;
+      height:52px;
+      object-fit:contain;
+      display:block;
+      filter:drop-shadow(3px 4px 0 rgba(0,0,0,.32));
+      animation:taxiBounce .65s ease-in-out infinite alternate;
+    }
+
+    .road-marquee-item span{
+      display:inline-flex;
+      align-items:center;
+      min-height:38px;
+      padding:7px 18px 8px;
+      background:var(--yellow);
+      color:var(--black);
+      border:3px solid var(--black);
+      border-radius:999px;
+      box-shadow:4px 4px 0 var(--black);
+      font-family:var(--body);
+      font-size:.95rem;
+      font-weight:950;
+      line-height:1;
+      letter-spacing:.01em;
+    }
+
+    /* alternate color tags */
+    .road-marquee-item:nth-child(3n) span{
+      background:var(--white);
+    }
+
+    .road-marquee-item:nth-child(4n) span{
+      background:var(--red);
+      color:var(--white);
+    }
+
+    /* continuous sliding */
+    @keyframes roadMarqueeDrive{
+      from{
+        transform:translateX(0);
+      }
+      to{
+        transform:translateX(-50%);
+      }
+    }
+
+    /* small taxi movement */
+    @keyframes taxiBounce{
+      from{
+        transform:translateY(0) rotate(-2deg);
+      }
+      to{
+        transform:translateY(-2px) rotate(2deg);
+      }
+    }
+
+    /* responsive */
+    @media (max-width:767px){
+      .road-marquee-section{
+        height:74px;
+      }
+
+      .road-marquee-item{
+        margin-right:34px;
+        gap:9px;
+      }
+
+      .road-marquee-item img{
+        width:42px;
+        height:42px;
+      }
+
+      .road-marquee-item span{
+        min-height:34px;
+        padding:7px 14px;
+        font-size:.82rem;
+      }
+    }
+
+  /* =========================================================
+    SECTION: DRIVER CTA / OPEN TAXI
+  ========================================================= */
+  .driver-open-section{
+    position:relative;
+    overflow:hidden;
+    padding:88px 0;
+    border-top:14px solid var(--yellow);
+    border-bottom:14px solid var(--blue);
+  }
+
+  .driver-open-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:54px;
+    align-items:center;
+  }
+
+  /* LEFT IMAGE */
+  .driver-open-visual{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .driver-open-top-btn{
+    align-self:flex-start;
+    margin-left:8%;
+    margin-bottom:-18px;
+    position:relative;
+    z-index:3;
+    transform:rotate(-2deg);
+  }
+
+  .driver-open-image{
+    width:min(100%, 760px);
+    display:block;
+    object-fit:contain;
+    position:relative;
+    z-index:2;
+    filter:drop-shadow(10px 14px 0 rgba(17,17,17,.16));
+  }
+
+  /* RIGHT CONTENT */
+  .driver-open-content{
+    position:relative;
+    z-index:2;
+  }
+
+  .driver-open-title{
+    margin-top:8px;
+    margin-bottom:18px;
+  }
+
+  .driver-open-points{
+    display:grid;
+    gap:14px;
+    margin:0 0 28px;
+  }
+
+  .driver-open-point{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:16px;
+    align-items:start;
+    padding:18px 20px;
+    background:rgba(255,248,231,.72);
+    border:3px solid var(--black);
+    border-radius:22px;
+    box-shadow:6px 6px 0 var(--black);
+  }
+
+  .driver-open-num{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:54px;
+    height:44px;
+    border:3px solid var(--black);
+    border-radius:999px;
+    background:var(--yellow);
+    color:var(--black);
+    font-family:var(--display);
+    font-size:1.25rem;
+    line-height:1;
+    box-shadow:3px 3px 0 var(--black);
+  }
+
+  .driver-open-point h3{
+    margin:0 0 6px;
+    color:var(--black);
+    font-family:var(--body);
+    font-size:1.12rem;
+    line-height:1.15;
+    font-weight:950;
+    letter-spacing:-.02em;
+  }
+
+  .driver-open-point p{
+    margin:0;
+    color:#3f372d;
+    font-size:.95rem;
+    line-height:1.45;
+    font-weight:650;
+  }
+
+  .driver-open-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+
+  /* decorative background shapes */
+  .driver-open-section::before{
+    content:"";
+    position:absolute;
+    width:420px;
+    height:420px;
+    left:-120px;
+    bottom:-170px;
+    border-radius:50%;
+    border:4px solid rgba(246,196,0,.55);
+    border-right-color:transparent;
+    pointer-events:none;
+  }
+
+  .driver-open-section::after{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    right:-70px;
+    top:70px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(47,132,238,.12) 0%, rgba(47,132,238,0) 70%);
+    pointer-events:none;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width:1100px){
+    .driver-open-grid{
+      grid-template-columns:1fr;
+      gap:36px;
+    }
+
+    .driver-open-top-btn{
+      align-self:center;
+      margin-left:0;
+    }
+
+    .driver-open-content{
+      text-align:left;
+    }
+  }
+
+  @media (max-width:767px){
+    .driver-open-section{
+      padding:68px 0;
+    }
+
+    .driver-open-grid{
+      gap:26px;
+    }
+
+    .driver-open-top-btn{
+      margin-bottom:-10px;
+    }
+
+    .driver-open-point{
+      grid-template-columns:1fr;
+      padding:16px;
+    }
+
+    .driver-open-num{
+      width:48px;
+      height:40px;
+    }
+
+    .driver-open-actions{
+      flex-direction:column;
+    }
+
+    .driver-open-actions .btn,
+    .driver-open-top-btn{
+      width:100%;
+    }
+  }
+
+  /* =========================================================
+    FAQ + FINAL CTA SECTION
+  ========================================================= */
+  .ts-faq-cta-section{
+    position:relative;
+    overflow:hidden;
+    padding:90px 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.16) 0 2px, transparent 2px) 0 0 / 22px 22px,
+      linear-gradient(180deg, #5fa2ff 0%, #4a8ef2 100%);
+  }
+
+  .ts-faq-cta-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:28px;
+    align-items:center;
+    min-height:560px;
+  }
+
+  /* LEFT */
+  .ts-faq-col{
+    display:flex;
+    align-items:center;
+    height:100%;
+  }
+
+  .ts-faq-inner{
+    width:100%;
+  }
+
+  .ts-faq-title{
+    margin:0 0 28px;
+    line-height:.9;
+    text-transform:uppercase;
+  }
+
+  .ts-faq-title-top{
+    display:block;
+    font-family:var(--display);
+    font-size:clamp(3rem, 6vw, 5.4rem);
+    color:var(--black);
+    letter-spacing:.01em;
+  }
+
+  .ts-faq-title-bottom{
+    display:block;
+    font-family:var(--display);
+    font-size:clamp(2.8rem, 5.8vw, 5.1rem);
+    color:var(--red);
+    -webkit-text-stroke:1.5px var(--black);
+    text-shadow:2px 2px 0 var(--yellow), 4px 4px 0 var(--black);
+    letter-spacing:.01em;
+  }
+
+  .ts-faq-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .ts-faq-item{
+    border:4px solid var(--black);
+    border-radius:28px;
+    background:var(--cream);
+    box-shadow:8px 8px 0 var(--black);
+    overflow:hidden;
+  }
+
+  .ts-faq-question{
+    width:100%;
+    background:none;
+    border:none;
+    padding:24px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    text-align:left;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight:900;
+    color:var(--black);
+  }
+
+  .ts-faq-question span:first-child{
+    font-size:clamp(1rem, 1.2vw, 1.05rem);
+    line-height:1.35;
+  }
+
+  .ts-faq-icon{
+    flex:0 0 auto;
+    font-size:1.4rem;
+    line-height:1;
+    font-weight:900;
+    transition:transform .25s ease;
+  }
+
+  .ts-faq-answer{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+  }
+
+  .ts-faq-answer p{
+    margin:0;
+    padding:0 28px 24px;
+    font-size:clamp(1rem, 1.12vw, 1.1rem);
+    line-height:1.6;
+    color:rgba(17,17,17,.84);
+    font-weight:700;
+  }
+
+  .ts-faq-item.active .ts-faq-answer{
+    max-height:220px;
+  }
+
+  .ts-faq-item.active .ts-faq-icon{
+    transform:rotate(0deg);
+  }
+
+  /* RIGHT */
+  .ts-final-cta-col{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+  }
+
+  .ts-final-cta-card{
+    width:100%;
+    max-width:520px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    padding:0;
+  }
+
+  .ts-final-cta-visual{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .ts-final-cta-image{
+    width:min(100%, 540px);
+    max-width:540px;
+    display:block;
+    object-fit:contain;
+  }
+
+  .ts-final-cta-title{
+    margin:-28px 0 0;
+    text-align:center;
+    font-family:var(--display);
+    font-size: clamp(2rem, 3.5vw, 3.5rem);
+    font-weight: 400;
+    white-space: nowrap;
+    line-height:.9;
+    text-transform:uppercase;
+    color:var(--white);
+    -webkit-text-stroke:2px transparent;
+    text-shadow:4px 4px 0 var(--black);
+    position:relative;
+    z-index:2;
+  }
+
+  /* BUTTONS */
+  .ts-faq-cta-section .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:58px;
+    padding:0 28px;
+    border:4px solid var(--black);
+    border-radius:999px;
+    background:var(--white);
+    color:var(--black);
+    text-decoration:none;
+    font-weight:900;
+    font-size:1rem;
+    box-shadow:6px 6px 0 var(--black);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+
+  .ts-faq-cta-section .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:8px 8px 0 var(--black);
+  }
+
+  .ts-faq-cta-section .btn.btn-primary{
+    background:var(--yellow);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px){
+    .ts-faq-cta-grid{
+      grid-template-columns:1fr;
+      min-height:auto;
+    }
+
+    .ts-faq-col,
+    .ts-final-cta-col{
+      justify-content:center;
+      align-items:center;
+    }
+
+    .ts-final-cta-card{
+      max-width:560px;
+    }
+  }
+
+  @media (max-width: 767px){
+    .ts-faq-cta-section{
+      padding:72px 0;
+    }
+
+    .ts-faq-question{
+      padding:20px 20px;
+    }
+
+    .ts-faq-answer p{
+      padding:0 20px 20px;
+    }
+
+    .ts-final-cta-image{
+      max-width:100%;
+    }
+
+    .ts-final-cta-title{
+      margin:-12px 0 0;
+      font-size:clamp(2.2rem, 10vw, 3.4rem);
+      text-shadow:3px 3px 0 var(--black);
+    }
+
+    .ts-faq-cta-section .btn{
+      width:100%;
+    }
+  }
+
+    /* =========================================================
+      FOOTER
+    ========================================================= */
+    .btn.btn-primary.footer-cta {
+      color: var(--black);
+    }
+    .site-footer{
+      position:relative;
+      overflow:hidden;
+      background:var(--charcoal);
+      color:var(--white);
+      border-top:5px solid var(--black);
+      padding:38px 0;
+    }
+
+    .site-footer::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:radial-gradient(rgba(255,255,255,.08) 1.2px, transparent 1.2px);
+      background-size:18px 18px;
+      opacity:.35;
+    }
+
+    .footer-grid{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:1.1fr 1fr auto;
+      gap:28px;
+      align-items:center;
+    }
+
+    .footer-logo-wrap{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      width:max-content;
+    }
+
+    .footer-brand img{
+      width:68px;
+      height:auto;
+      object-fit:contain;
+    }
+
+    .footer-brand-text{
+      display:flex;
+      flex-direction:column;
+      font-family:var(--display);
+      text-transform:uppercase;
+      line-height:.78;
+      letter-spacing:.02em;
+      font-size:1.25rem;
+      transform:rotate(-2deg);
+    }
+
+    .footer-brand-text span:first-child{
+      color:var(--white);
+      text-shadow:2px 2px 0 var(--black), 3px 3px 0 var(--yellow);
+    }
+
+    .footer-brand-text span:last-child{
+      color:var(--yellow);
+      -webkit-text-stroke:1px var(--black);
+      text-shadow:2px 2px 0 var(--black);
+    }
+
+    .footer-brand p{
+      margin-top:12px;
+      max-width:390px;
+      color:rgba(255,255,255,.72);
+      font-size:.9rem;
+      line-height:1.55;
+      font-weight:650;
+    }
+
+    .footer-links{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:18px 22px;
+    }
+
+    .footer-links a{
+      position:relative;
+      color:rgba(255,255,255,.86);
+      font-size:.9rem;
+      font-weight:850;
+      transition:.15s ease;
+    }
+
+    .footer-links a::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-6px;
+      height:3px;
+      width:0;
+      margin:auto;
+      background:var(--yellow);
+      transition:width .18s ease;
+    }
+
+    .footer-links a:hover{
+      color:var(--white);
+    }
+
+    .footer-links a:hover::after{
+      width:100%;
+    }
+
+    .footer-side{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:14px;
+    }
+
+    .footer-cta{
+      min-width:132px;
+    }
+
+    .footer-mini{
+      color:rgba(255,255,255,.62);
+      font-size:.8rem;
+      line-height:1.45;
+      font-weight:650;
+      text-align:right;
+    }
+
+    /* RESPONSIVE FOOTER */
+    @media (max-width: 980px){
+      .footer-grid{
+        grid-template-columns:1fr;
+        text-align:center;
+        gap:26px;
+      }
+
+      .footer-logo-wrap{
+        margin:0 auto;
+      }
+
+      .footer-brand p{
+        margin-left:auto;
+        margin-right:auto;
+      }
+
+      .footer-links{
+        justify-content:center;
+      }
+
+      .footer-side{
+        align-items:center;
+      }
+
+      .footer-mini{
+        text-align:center;
+      }
+    }
+
+    @media (max-width: 560px){
+      .site-footer{
+        padding:34px 0;
+      }
+
+      .footer-logo-wrap{
+        flex-direction:column;
+        gap:8px;
+      }
+
+      .footer-brand img{
+        width:64px;
+      }
+
+      .footer-brand-text{
+        align-items:center;
+        font-size:1.15rem;
+      }
+
+      .footer-links{
+        gap:14px 18px;
+      }
+
+      .footer-links a{
+        font-size:.84rem;
+      }
+
+      .footer-cta{
+        width:100%;
+        max-width:240px;
+      }
+    }
+
+    /* =========================================================
+      17. RESPONSIVE
+    ========================================================= */
+    @media (max-width: 1100px){
+      .hero-grid,
+      .why-layout,
+      .footer-grid{
+        grid-template-columns:1fr;
+      }
+
+      .footer-links{
+        justify-content:flex-start;
+      }
+
+      .footer-mini{
+        text-align:left;
+      }
+
+      .why-visual-wrap{
+        min-height:350px;
+      }
+
+      .why-driver-art{
+        width:min(420px, 100%);
+      }
+    }
+
+    @media (max-width: 820px){
+      .site-header-inner{
+        grid-template-columns:1fr;
+        padding:14px 0;
+        gap:14px;
+      }
+
+      .brand,
+      .main-nav,
+      .main-cta{
+        justify-content:center;
+      }
+
+      .main-nav ul{
+        gap:16px;
+      }
+
+      .hero-grid,
+      .pain-grid,
+      .poster-grid,
+      .poster-grid{
+        grid-template-columns:1fr;
+      }
+
+      .plate-card-wide{
+        grid-column:auto;
+        grid-template-columns:1fr;
+      }
+
+      .hero{
+        padding-top:58px;
+      }
+
+      .hero-title{
+        font-size:clamp(3rem, 16vw, 4.8rem);
+      }
+
+      .section-title{
+        font-size:clamp(2.2rem, 12vw, 3.8rem);
+      }
+
+      .hero-title .tara,
+      .hero-title .sakai{
+        text-shadow:3px 3px 0 var(--white), 6px 6px 0 var(--black);
+      }
+
+      .hero-title .sakai{
+        text-shadow:3px 3px 0 var(--yellow), 6px 6px 0 var(--black);
+      }
+
+      .hero-art{
+        min-height:410px;
+      }
+
+      .hero-orbit.one{
+        width:min(410px, 100%);
+        height:min(410px, 100%);
+      }
+
+      .hero-orbit.two{
+        width:min(340px, 84%);
+        height:min(340px, 84%);
+      }
+
+      .hero-circle-yellow{
+        width:min(310px, 74%);
+        height:min(310px, 74%);
+      }
+
+      .hero-circle-black{
+        width:82px;
+        height:82px;
+        right:calc(50% - 150px);
+        top:28px;
+      }
+
+      .hero-dot.d1{ width:40px; height:40px; left:24px; }
+      .hero-dot.d2{ width:20px; height:20px; left:100px; top:22px; }
+      .hero-dot.d3{ width:20px; height:20px; top:88px; right:28px; }
+      .hero-dot.d4{ width:30px; height:30px; bottom:48px; left:40px; }
+
+      .hero-image{
+        width:min(420px, 108%);
+      }
+
+      .why-main-title{
+        margin-top:100px;
+        font-size:clamp(2.7rem, 13vw, 4rem);
+      }
+
+      .why-visual-wrap{
+        min-height:300px;
+      }
+
+      .why-driver-art{
+        width:min(350px, 100%);
+      }
+
+      .plate-card,
+      .plate-card-wide{
+        min-height:auto;
+      }
+
+      .plate-card h3,
+      .plate-wide-copy h3{
+        max-width:100%;
+        font-size:clamp(1.6rem, 8vw, 2.35rem);
+      }
+
+      .plate-card p,
+      .plate-wide-copy p{
+        max-width:100%;
+      }
+
+      .poster-head h2{
+        font-size:clamp(2rem, 10vw, 3rem);
+      }
+
+      section{
+        padding:60px 0;
+      }
+    }
+
+    /* =========================================================
+      18. RESPONSIVE POLISH / ADAPTABILITY OVERRIDES
+      These overrides keep the desktop look intact and only improve
+      tablet/mobile scaling, spacing, wrapping, and overflow behavior.
+    ========================================================= */
+
+    html,
+    body{
+      max-width:100%;
+    }
+
+    @media (max-width: 1280px){
+      .container{ width:min(1080px, calc(100% - 40px)); }
+      .hero-title{ font-size:clamp(4rem, 9vw, 7.6rem); }
+      .hero-image{ width:min(520px, 104%); }
+      .poster-frame{ width:min(820px, 100%); }
+      .app-screen-card{ flex-basis:245px; }
+      .blog-content{ padding:22px 20px 22px; }
+    }
+
+    @media (max-width: 1024px){
+      section{ padding:72px 0; }
+      .site-header-inner{ min-height:72px; gap:16px; }
+      .brand img{ width:66px; }
+      .main-nav ul{ gap:20px; }
+      .header-cta{ min-width:132px; }
+      .hero{ height:auto; min-height:calc(100svh - 72px); padding:72px 0 64px; background-position:center right; }
+      .hero-grid{ gap:28px; }
+      .hero-art{ min-height:440px; }
+      .hero-image{ width:min(470px, 106%); }
+      .hero-circle-yellow{ width:min(360px, 80%); height:min(360px, 80%); }
+      .why-layout{ gap:28px; }
+      .why-visual-wrap{ min-height:330px; }
+      .pain-grid{ gap:16px; }
+      .plate-card{ padding:24px 22px 20px; min-height:190px; }
+      .poster-inner{ padding:28px; }
+      .poster-grid{ gap:14px; }
+      .blog-section-head{ grid-template-columns:1fr; align-items:start; }
+      .blog-section-copy{ max-width:760px; }
+      .driver-open-grid, .ts-faq-cta-grid{ grid-template-columns:1fr; }
+      .driver-open-content{ max-width:760px; margin:0 auto; }
+      .driver-open-title{ margin-left:auto; margin-right:auto; }
+      .ts-faq-cta-grid{ min-height:unset; gap:42px; }
+      .ts-final-cta-card{ max-width:600px; }
+    }
+
+    @media (max-width: 900px){
+      .container{ width:min(720px, calc(100% - 32px)); }
+      .site-header-inner{ grid-template-columns:auto 1fr; grid-template-areas:"brand cta" "nav nav"; padding:10px 0 12px; row-gap:10px; }
+      .brand{ grid-area:brand; }
+      .main-cta{ grid-area:cta; justify-content:flex-end; }
+      .main-nav{ grid-area:nav; width:100%; overflow:hidden; }
+      .main-nav ul{ justify-content:flex-start; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; gap:18px; padding:2px 2px 8px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+      .main-nav ul::-webkit-scrollbar{ display:none; }
+      .main-nav a{ white-space:nowrap; font-size:.86rem; }
+      .header-cta{ min-height:42px; min-width:118px; padding:8px 18px; }
+      .hero-grid{ grid-template-columns:1fr; text-align:center; }
+      .hero-title{ margin-left:auto; margin-right:auto; }
+      .hero-copy{ margin-left:auto; margin-right:auto; }
+      .hero-actions{ justify-content:center; }
+      .hero-art{ min-height:360px; max-width:560px; width:100%; margin:0 auto; }
+      .why-layout, .pain-grid, .poster-grid{ grid-template-columns:1fr; }
+      .why-copy{ max-width:560px; margin:0 auto; }
+      .why-main-title{ margin-top:104px; }
+      .pain-grid{ max-width:640px; margin:0 auto; }
+      .plate-card-wide{ grid-column:auto; grid-template-columns:1fr; }
+      .poster-frame{ width:min(620px, 100%); }
+      .poster-card{ min-height:auto; }
+      .app-screens-row{ justify-content:flex-start; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-left:4px; padding-right:4px; }
+      .app-screen-card{ scroll-snap-align:center; flex:0 0 230px; }
+      .blog-grid{ display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding:4px 4px 16px; }
+      .blog-card{ flex:0 0 min(420px, 82vw); scroll-snap-align:center; }
+      .blog-nav{ margin-top:20px; }
+      .driver-open-grid{ gap:34px; }
+      .driver-open-visual{ max-width:680px; margin:0 auto; }
+      .driver-open-top-btn{ align-self:center; margin-left:0; }
+      .ts-faq-col, .ts-final-cta-col{ width:100%; }
+    }
+
+    @media (max-width: 767px){
+      .container{ width:calc(100% - 24px); }
+      section{ padding:58px 0; }
+      .btn{ min-height:42px; padding:9px 16px; border-width:2.5px; box-shadow:4px 4px 0 var(--black); font-size:.84rem; }
+      .site-header-inner{ min-height:auto; }
+      .brand img{ width:58px; }
+      .main-nav ul{ gap:14px; padding-bottom:6px; }
+      .main-nav a{ font-size:.8rem; }
+      .header-cta{ min-width:auto; min-height:38px; padding:7px 14px; font-size:.78rem; }
+      .hero{ height:auto !important; min-height:auto; padding:54px 0 44px; align-items:flex-start; background-size:cover; background-position:58% center; }
+      .hero::before{ opacity:.12; }
+      .hero-grid{ gap:20px; }
+      .hero-title{ font-size:clamp(3.1rem, 18vw, 5.2rem); margin-bottom:12px; }
+      .hero-title .tara, .hero-title .sakai{ -webkit-text-stroke:1.4px var(--black); }
+      .hero-copy{ max-width:94%; font-size:.88rem; line-height:1.45; margin-bottom:18px; }
+      .hero-actions{ gap:10px; }
+      .hero-art{ min-height:290px; }
+      .hero-image{ width:min(350px, 108%); transform:translateY(0); }
+      .hero-circle-yellow{ width:min(245px, 72%); height:min(245px, 72%); }
+      .hero-orbit.one{ width:min(315px, 92%); height:min(315px, 92%); border-width:3px; }
+      .hero-orbit.two{ width:min(270px, 82%); height:min(270px, 82%); border-width:2px; }
+      .hero-circle-black{ width:62px; height:62px; top:22px; right:calc(50% - 130px); }
+      .hero-dot.d1{ width:28px; height:28px; top:46px; left:18px; }
+      .hero-dot.d2{ width:16px; height:16px; top:18px; left:82px; }
+      .hero-dot.d3{ width:16px; height:16px; top:74px; right:22px; }
+      .hero-dot.d4{ width:24px; height:24px; bottom:34px; left:30px; }
+      .why-section{ padding:56px 0; }
+      .why-visual-wrap{ min-height:250px; align-items:flex-end; }
+      .why-driver-art{ width:min(280px, 82vw); left:50%; transform:translateX(-50%); }
+      .why-main-title{ margin:98px auto 0; font-size:clamp(2.35rem, 14vw, 3.9rem); text-align:center; }
+      .plate-card{ padding:22px 18px 20px; border-width:2.5px; border-radius:22px; box-shadow:5px 5px 0 var(--black); }
+      .plate-card h3, .plate-wide-copy h3{ max-width:calc(100% - 58px); font-size:clamp(1.45rem, 8vw, 2.1rem); }
+      .plate-card p, .plate-wide-copy p{ max-width:100%; font-size:.86rem; }
+      .plate-num{ right:20px; font-size:1.7rem; }
+      .pill-stack-plate span{ min-height:42px; font-size:.82rem; border-width:2.5px; }
+      .road-marquee-section{ height:56px !important; min-height:56px !important; max-height:56px !important; }
+      .road-marquee-section::before{ height:6px; background-size:168px 6px; }
+      .road-marquee-item{ gap:8px; margin-right:26px; transform:none !important; }
+      .road-marquee-item:nth-child(even){ transform:none !important; }
+      .road-marquee-item img{ width:32px !important; height:32px !important; }
+      .road-marquee-item span{ min-height:26px; padding:5px 10px; border-width:2px; box-shadow:3px 3px 0 var(--black); font-size:.72rem; }
+      .poster-frame{ padding:16px; border-width:3px; border-radius:22px; }
+      .poster-inner{ padding:20px 16px; }
+      .poster-head h2{ font-size:clamp(1.6rem, 9vw, 2.5rem); }
+      .poster-grid{ gap:12px; }
+      .poster-card{ padding:16px; }
+      .poster-icon{ width:44px; height:44px; border-width:2.5px; border-radius:14px; margin-bottom:12px; }
+      .app-showcase-section{ padding:58px 0 64px; }
+      .app-showcase-head{ margin-bottom:22px; }
+      .traffic-title{ display:grid; grid-template-columns:1fr; gap:12px; justify-items:center; }
+      .traffic-signal{ width:44px; height:21px; border-width:2.5px; }
+      .traffic-dot{ width:12px; height:12px; }
+      .traffic-text{ font-size:clamp(2.15rem, 13vw, 3.35rem); -webkit-text-stroke:1px #111; }
+      .app-screens-row{ gap:16px; }
+      .app-screen-card{ flex-basis:min(215px, 74vw); padding:10px 10px 14px; border-width:3px; border-radius:28px; box-shadow:6px 6px 0 var(--black); }
+      .app-screen-card img{ border-width:2.5px; border-radius:20px; }
+      .app-screen-card figcaption{ font-size:.84rem; }
+      .store-buttons{ gap:12px; margin-top:20px; }
+      .store-badge-btn{ border-width:2.5px; border-radius:12px; box-shadow:4px 4px 0 var(--black); }
+      .store-badge-btn img{ height:44px; border-radius:9px; }
+      .blog-section{ padding:60px 0 58px; }
+      .blog-section-head{ gap:12px; margin-bottom:22px; }
+      .blog-section-copy{ font-size:.9rem; }
+      .blog-card{ flex-basis:min(330px, 86vw); border-width:3px; border-radius:20px; box-shadow:6px 6px 0 var(--black); }
+      .blog-content{ padding:18px 16px 18px; }
+      .blog-content h3{ font-size:clamp(1.2rem, 7vw, 1.7rem); margin-bottom:12px; }
+      .blog-content p{ font-size:.88rem; line-height:1.5; margin-bottom:18px; }
+      .blog-meta{ font-size:.65rem; padding:5px 9px; border-width:2px; }
+      .blog-arrow{ width:42px; height:42px; font-size:1.25rem; }
+      .driver-open-section{ padding:58px 0; border-top-width:9px; border-bottom-width:9px; }
+      .driver-open-grid{ gap:22px; }
+      .driver-open-image{ width:min(100%, 520px); filter:drop-shadow(6px 9px 0 rgba(17,17,17,.14)); }
+      .driver-open-title{ text-align:center; margin:6px auto 18px; }
+      .driver-open-title .dark, .driver-open-title .red{ white-space:normal; }
+      .driver-open-points{ gap:12px; margin-bottom:20px; }
+      .driver-open-point{ grid-template-columns:auto 1fr; gap:12px; padding:14px; border-width:2.5px; border-radius:18px; box-shadow:5px 5px 0 var(--black); }
+      .driver-open-num{ width:46px; height:38px; border-width:2.5px; font-size:1rem; }
+      .driver-open-point h3{ font-size:.98rem; }
+      .driver-open-point p{ font-size:.82rem; }
+      .driver-open-actions{ justify-content:center; }
+      .ts-faq-cta-section{ padding:58px 0; }
+      .ts-faq-cta-grid{ gap:30px; }
+      .ts-faq-list{ gap:12px; }
+      .ts-faq-item{ border-width:2.5px; border-radius:20px; box-shadow:5px 5px 0 var(--black); }
+      .ts-faq-question{ padding:16px; gap:12px; }
+      .ts-faq-question span:first-child{ font-size:.9rem; }
+      .ts-faq-answer p{ padding:0 16px 16px; font-size:.88rem; line-height:1.5; }
+      .ts-final-cta-card{ max-width:420px; }
+      .ts-final-cta-image{ width:min(100%, 410px); }
+      .ts-final-cta-title{ margin:-10px 0 0; font-size:clamp(1.5rem, 8vw, 2.6rem); white-space:nowrap; text-shadow:3px 3px 0 var(--black); }
+      .ts-faq-cta-section .store-buttons{ flex-wrap:nowrap; gap:10px; }
+      .ts-faq-cta-section .store-badge-btn img{ height:40px; }
+      .footer-grid{ grid-template-columns:1fr; text-align:center; align-items:center; }
+      .footer-brand img{ margin:0 auto; }
+      .footer-brand p{ margin-left:auto; margin-right:auto; }
+      .footer-links{ justify-content:center; }
+      .footer-mini{ text-align:center; }
+    }
+
+    @media (max-width: 420px){
+      .container{ width:calc(100% - 20px); }
+      section{ padding:50px 0; }
+      .hero-title{ font-size:clamp(2.75rem, 17vw, 4.1rem); }
+      .hero-copy{ font-size:.82rem; }
+      .hero-art{ min-height:250px; }
+      .hero-image{ width:min(300px, 110%); }
+      .hero-circle-yellow{ width:min(210px, 70%); height:min(210px, 70%); }
+      .why-main-title{ font-size:clamp(2.1rem, 15vw, 3.2rem); }
+      .plate-card h3, .plate-wide-copy h3{ font-size:clamp(1.25rem, 8vw, 1.8rem); }
+      .poster-inner{ padding:18px 12px; }
+      .poster-card{ padding:14px; }
+      .traffic-text{ font-size:clamp(1.85rem, 13vw, 2.65rem); }
+      .app-screen-card{ flex-basis:78vw; }
+      .store-badge-btn img{ height:38px; }
+      .blog-card{ flex-basis:88vw; }
+      .driver-open-point{ grid-template-columns:1fr; }
+      .driver-open-num{ width:44px; }
+      .driver-open-actions .btn, .driver-open-top-btn{ width:100%; }
+      .ts-faq-cta-section .store-buttons{ flex-wrap:wrap; }
+      .ts-faq-cta-section .store-badge-btn img{ height:38px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *, *::before, *::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- =========================================================
+    HEADER
+  ========================================================= -->
+  <header class="site-header">
+    <div class="container site-header-inner">
+      <a href="#top" class="brand" aria-label="Sakai Taksi home">
+        <img src="logo.png" alt="Sakai Taksi logo" />
+
+        <span class="brand-text">
+          <span>Sakai</span>
+          <span>Taksi</span>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <ul>
+          <li><a href="#top">Home</a></li>
+          <li><a href="#why">About</a></li>
+          <li><a href="#poster">Features</a></li>
+          <li><a href="#app">App</a></li>
+          <li><a href="#content">Updates</a></li>
+          <li><a href="#faq">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="main-cta">
+        <a href="#join" class="btn btn-primary header-cta">Book Now</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- =========================================================
+      SECTION 01: HERO
+    ========================================================= -->
+    <section class="hero bg-cream pattern-grid">
+      <div class="container hero-grid">
+        <div class="reveal">
+          <h1 class="hero-title">
+            <span class="tara">Tara</span>
+            <span class="sakai">Sakai!</span>
+          </h1>
+
+          <p class="hero-copy">
+            Lorem Ipsum dolor sit amet, consectetur adipiscing elit. Donec suscipit auctor dui, at volutpat enim efficitur sed.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#join" class="btn btn-primary">Book Now</a>
+            <a href="#app" class="btn">Become a Driver</a>
+          </div>
+        </div>
+
+        <div class="hero-art reveal">
+          <div class="hero-orbit one" aria-hidden="true"></div>
+          <div class="hero-orbit two" aria-hidden="true"></div>
+          <div class="hero-circle-yellow" aria-hidden="true"></div>
+          <div class="hero-circle-black" aria-hidden="true"></div>
+
+          <span class="hero-dot d1" aria-hidden="true"></span>
+          <span class="hero-dot d2" aria-hidden="true"></span>
+          <span class="hero-dot d3" aria-hidden="true"></span>
+          <span class="hero-dot d4" aria-hidden="true"></span>
+
+          <img class="hero-image" src="assets/tara-sakai-main.png" alt="Sakai taxi illustration" />
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      SECTION 02: WHY / PAIN POINTS
+    ========================================================= -->
+    <section id="why" class="bg-paper pattern-light-dots why-section">
+      <div class="container why-layout">
+        <div class="why-copy reveal">
+          <div class="why-visual-wrap">
+            <img class="why-driver-art" src="assets/driver-phone-taxi.png" alt="Driver holding phone with taxi" />
+
+            <h2 class="why-main-title">
+              <span class="blue">Taxi Mo,</span>
+              <span class="red">Kita Mo.</span>
+            </h2>
+          </div>
+        </div>
+
+        <div class="pain-grid reveal">
+          <article class="plate-card">
+            <span class="plate-bolt bolt-tl"></span>
+            <span class="plate-bolt bolt-tr"></span>
+            <span class="plate-bolt bolt-bl"></span>
+            <span class="plate-bolt bolt-br"></span>
+
+            <span class="plate-num">01</span>
+
+            <h3>Mabilis Umalis</h3>
+            <p>Mabigat ang kaltas at rules, kaya madaling umalis ang driver.</p>
+          </article>
+
+          <article class="plate-card">
+            <span class="plate-bolt bolt-tl"></span>
+            <span class="plate-bolt bolt-tr"></span>
+            <span class="plate-bolt bolt-bl"></span>
+            <span class="plate-bolt bolt-br"></span>
+
+            <span class="plate-num">02</span>
+
+            <h3>Bitin ang Bonus</h3>
+            <p>Kaunting sablay, bawas agad ang bonus at incentive.</p>
+          </article>
+
+          <article class="plate-card plate-card-wide plate-card-yellow">
+            <span class="plate-bolt bolt-tl"></span>
+            <span class="plate-bolt bolt-tr"></span>
+            <span class="plate-bolt bolt-bl"></span>
+            <span class="plate-bolt bolt-br"></span>
+
+            <span class="plate-num">03</span>
+
+            <div class="plate-wide-copy">
+              <h3>Mas Simple. Mas Swabe.</h3>
+              <p>Mas malinaw na fees, mas kaunting friction, at mas pabor sa tsuper.</p>
+            </div>
+
+            <div class="pill-stack-plate">
+              <span>Fixed Cut</span>
+              <span>Clear Fees</span>
+              <span>Driver-First</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      SECTION: ROAD MARQUEE
+    ========================================================= -->
+    <section class="road-marquee-section" aria-label="Tara Sakai moving road banner">
+      <div class="road-marquee-track">
+
+        <div class="road-marquee-group">
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="Taxi icon" />
+            <span>Tara na, Sakai na!</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="Taxi icon" />
+            <span>Para sa Tsuper</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="Taxi icon" />
+            <span>Tawag. Pili. Sakai!</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="Taxi icon" />
+            <span>Mas Madali ang Biyahe</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="Taxi icon" />
+            <span>100% Pamasahe sa Driver</span>
+          </div>
+        </div>
+
+        <div class="road-marquee-group" aria-hidden="true">
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="" />
+            <span>Tara na, Sakai na!</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="" />
+            <span>Para sa Tsuper</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="" />
+            <span>Tawag. Pili. Sakai!</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="" />
+            <span>Mas Madali ang Biyahe</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="" />
+            <span>100% Pamasahe sa Driver</span>
+          </div>
+
+          <div class="road-marquee-item">
+            <img src="assets/taxi-top.png" alt="" />
+            <span>Tawag. Pili. Sakai!</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+      SECTION 03: FEATURE POSTER
+    ========================================================= -->
+    <section id="poster" class="bg-red pattern-dots">
+      <div class="container poster-wrap reveal">
+        <div class="card poster-frame">
+          <div class="poster-inner">
+            <div class="poster-head">
+              <h2>Para sa Pasahero<br />Para sa Tsuper</h2>
+            </div>
+
+            <div class="poster-grid">
+              <article class="poster-card">
+                <div class="poster-icon">🚕</div>
+                <h3>Easy Booking</h3>
+                <p>Madaling mag-book ng taxi gamit ang simple at pamilyar na booking flow.</p>
+                <div class="poster-meta">
+                  <span>• Simple booking steps</span>
+                  <span>• Pickup at dropoff</span>
+                </div>
+              </article>
+
+              <article class="poster-card">
+                <div class="poster-icon">₱</div>
+                <h3>100% Pamasahe sa Driver</h3>
+                <p>Kita agad ang estimated fare at booking fee bago mo i-confirm ang ride.</p>
+                <div class="poster-meta">
+                  <span>• Malinaw ang gastos</span>
+                  <span>• Walang gulatan</span>
+                </div>
+              </article>
+
+              <article class="poster-card">
+                <div class="poster-icon">🛡️</div>
+                <h3>Safer Rides</h3>
+                <p>Mas kampante ang biyahe dahil may driver details, ride flow, at rating support.</p>
+                <div class="poster-meta">
+                  <span>• Driver details shown</span>
+                  <span>• Rating after trip</span>
+                </div>
+              </article>
+
+              <article class="poster-card">
+                <div class="poster-icon">👨‍✈️</div>
+                <h3>Driver-First</h3>
+                <p>Built para sa traditional taxi drivers na gusto ng mas malinaw at mas simpleng sistema.</p>
+                <div class="poster-meta">
+                  <span>• Para sa tsuper</span>
+                  <span>• Less friction</span>
+                </div>
+              </article>
+
+              <article class="poster-card">
+                <div class="poster-icon">📍</div>
+                <h3>Nearby Taxi</h3>
+                <p>Pinapadali ang paghanap ng taxi na malapit sa pickup location mo.</p>
+                <div class="poster-meta">
+                  <span>• Faster matching</span>
+                  <span>• Practical for daily rides</span>
+                </div>
+              </article>
+
+              <article class="poster-card">
+                <div class="poster-icon">🌆</div>
+                <h3>Pang-araw-araw</h3>
+                <p>Akma sa regular na biyahe. Papasok, pauwi, o pang-araw-araw na lakad sa lungsod.</p>
+                <div class="poster-meta">
+                  <span>• Daily commute ready</span>
+                  <span>• Taxi culture talaga</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="poster-cta">
+              <a href="#app" class="btn btn-white">Learn More</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+      SECTION 04: APP SCREENSHOTS SHOWCASE
+    ========================================================= -->
+    <section class="bg-paper app-showcase-section" id="app">
+      <div class="container">
+        <div class="app-showcase-head reveal">
+          <div class="traffic-title" aria-label="Book Choose Ride">
+            <div class="traffic-word traffic-book">
+              <div class="traffic-signal">
+                <span class="traffic-dot red"></span>
+              </div>
+              <span class="traffic-text signal-red">TAWAG.</span>
+            </div>
+
+            <div class="traffic-word traffic-choose">
+              <div class="traffic-signal">
+                <span class="traffic-dot yellow"></span>
+              </div>
+              <span class="traffic-text signal-yellow">PILI.</span>
+            </div>
+
+            <div class="traffic-word traffic-ride">
+              <div class="traffic-signal">
+                <span class="traffic-dot green"></span>
+              </div>
+              <span class="traffic-text signal-green">SAKAI<span class="dark-exclamation">!</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="app-screens-row app-screens-four reveal" aria-label="Sakai app screenshots">
+          <figure class="app-screen-card">
+            <img
+              src="assets/01b7670e-6205-410c-85c8-0f8cc6cb2a86.jpg"
+              alt="Sakai home map screen"
+            />
+            <figcaption>Home Map</figcaption>
+          </figure>
+
+          <figure class="app-screen-card">
+            <img
+              src="assets/2be9d5ce-ffa2-46e5-be40-61240a689008.jpg"
+              alt="Sakai book ride screen"
+            />
+            <figcaption>Book Ride</figcaption>
+          </figure>
+
+          <figure class="app-screen-card">
+            <img
+              src="assets/e9cebd2d-8e72-41c1-863d-13a399e5b5c3.jpg"
+              alt="Sakai select driver screen"
+            />
+            <figcaption>Select Driver</figcaption>
+          </figure>
+
+          <figure class="app-screen-card">
+            <img
+              src="assets/73650851-57af-475c-84c8-49b1cb105cec.jpg"
+              alt="Sakai driver on the way screen"
+            />
+            <figcaption>Driver on the Way</figcaption>
+          </figure>
+        </div>
+
+        <div class="store-buttons reveal">
+          <a href="#" class="store-badge-btn app-store" aria-label="Download on the App Store">
+            <img src="assets/applestore.png" alt="Download on the App Store" />
+          </a>
+
+          <a href="#" class="store-badge-btn google-play" aria-label="Get it on Google Play">
+            <img src="assets/googleplay.png" alt="Get it on Google Play" />
+          </a>
+        </div>
+      </div>
+    </section>
+
+<!-- =========================================================
+  SECTION 05: BLOGS / STORIES
+========================================================= -->
+<section id="content" class="bg-yellow blog-section">
+  <div class="container">
+    <div class="blog-section-head reveal">
+      <div>
+
+        <h2 class="section-title blog-title">
+          <span class="dark">Kwento sa</span><br />
+          <span class="red">Kalsada.</span>
+        </h2>
+      </div>
+
+    </div>
+
+    <div class="blog-grid reveal">
+      <!-- Blog Card 01 -->
+      <article class="blog-card">
+        <a href="#" class="blog-thumb" aria-label="Read Bakit Taxi Pa Rin?">
+          <img
+            src="assets/blog-taxi-pa-rin.png"
+            alt="Sakai mascot beside a traditional taxi"
+          />
+        </a>
+
+        <div class="blog-content">
+          <div class="blog-meta">Taxi Culture</div>
+
+          <h3>
+            <a href="#">Bakit Taxi Pa Rin?</a>
+          </h3>
+
+          <p>
+            Sa panahon ng ride-hailing apps, may lugar pa rin ang traditional taxi lalo na kung mas malinaw, mas simple, at mas driver-first ang sistema.
+          </p>
+
+          <a href="#" class="blog-link">Learn More</a>
+        </div>
+      </article>
+
+      <!-- Blog Card 02 -->
+      <article class="blog-card">
+        <a href="#" class="blog-thumb" aria-label="Read Paano Gumagana ang Sakai?">
+          <img
+            src="assets/blog-app-flow.png"
+            alt="Sakai mascot showing the booking flow on a phone"
+          />
+        </a>
+
+        <div class="blog-content">
+          <div class="blog-meta">App Update</div>
+
+          <h3>
+            <a href="#">New App Preview Shows Taxi Booking Flow</a>
+          </h3>
+
+          <p>
+            Early interface screens show the core passenger journey, including pickup, dropoff, fare estimate, driver selection, and ride tracking.
+          </p>
+
+          <a href="#" class="blog-link">Learn More</a>
+        </div>
+      </article>
+
+      <!-- Blog Card 03 -->
+      <article class="blog-card">
+        <a href="#" class="blog-thumb" aria-label="Read Para sa Tsuper">
+          <img
+            src="assets/blog-para-sa-tsuper.png"
+            alt="Sakai mascot talking with a taxi driver"
+          />
+        </a>
+
+        <div class="blog-content">
+          <div class="blog-meta">For Drivers</div>
+
+          <h3>
+            <a href="#">Para sa Tsuper: Mas Malinaw na Kita</a>
+          </h3>
+
+          <p>
+            Sakai Taksi is built around clearer fees and less friction, para mas madaling maintindihan ng driver kung paano kikita sa bawat byahe.
+          </p>
+
+          <a href="#" class="blog-link">Learn More</a>
+        </div>
+      </article>
+    </div>
+
+    <div class="blog-nav reveal" aria-label="Blog slider controls">
+      <button class="blog-arrow" type="button" aria-label="Previous blogs">←</button>
+
+      <div class="blog-dots" aria-hidden="true">
+        <span class="active"></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <button class="blog-arrow" type="button" aria-label="Next blogs">→</button>
+    </div>
+  </div>
+</section>
+
+  <!-- =========================================================
+    SECTION: DRIVER CTA / OPEN TAXI
+  ========================================================= -->
+  <section class="driver-open-section bg-cream pattern-grid" id="presyo">
+    <div class="container driver-open-grid">
+
+      <!-- LEFT: TAXI IMAGE -->
+      <div class="driver-open-visual reveal">
+        <a href="#join" class="btn btn-primary driver-open-top-btn">
+          Become a Sakai Driver
+        </a>
+
+        <img
+          src="assets/taxi-open.png"
+          alt="Yellow taxi with open driver door"
+          class="driver-open-image"
+        />
+      </div>
+
+      <!-- RIGHT: DRIVER MESSAGE -->
+      <div class="driver-open-content reveal">
+
+        <h2 class="section-title driver-open-title">
+          <span class="dark">Bukas Ang Pinto</span><br />
+          <span class="red">Para sa Tsuper.</span>
+        </h2>
+
+        <div class="driver-open-points">
+          <div class="driver-open-point">
+            <span class="driver-open-num">01</span>
+            <div>
+              <h3>100% pamasahe sa driver</h3>
+              <p>The ride fare is intended to go directly to the taxi driver.</p>
+            </div>
+          </div>
+
+          <div class="driver-open-point">
+            <span class="driver-open-num">02</span>
+            <div>
+              <h3>Mas madaling sumali</h3>
+              <p>Designed with real taxi drivers in mind, not just app-heavy users.</p>
+            </div>
+          </div>
+
+          <div class="driver-open-point">
+            <span class="driver-open-num">03</span>
+            <div>
+              <h3>Mas klarong sistema</h3>
+              <p>Less confusion around commissions, cuts, and hidden deductions.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="driver-open-actions">
+          <a href="#why" class="btn">Learn More About Being a Sakai Driver</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
+    SECTION: FAQ + FINAL CTA
+  ========================================================= -->
+  <section class="ts-faq-cta-section" id="faq">
+    <div class="container ts-faq-cta-grid">
+
+      <!-- LEFT SIDE -->
+      <div class="ts-faq-col reveal">
+        <div class="ts-faq-inner">
+
+          <div class="ts-faq-list">
+            <div class="ts-faq-item active">
+              <button class="ts-faq-question" type="button">
+                <span>What kind of platform do you serve?</span>
+                <span class="ts-faq-icon">×</span>
+              </button>
+              <div class="ts-faq-answer">
+                <p>
+                  Sakai Taksi is a taxi-first booking platform concept focused on traditional Filipino taxi
+                  drivers and everyday commuters.
+                </p>
+              </div>
+            </div>
+
+            <div class="ts-faq-item">
+              <button class="ts-faq-question" type="button">
+                <span>Do you only serve passengers?</span>
+                <span class="ts-faq-icon">+</span>
+              </button>
+              <div class="ts-faq-answer">
+                <p>
+                  No. Tara Sakai Taksi is designed for both passengers and taxi drivers, with a system that
+                  aims to be simple, transparent, and easier to use on both sides.
+                </p>
+              </div>
+            </div>
+
+            <div class="ts-faq-item">
+              <button class="ts-faq-question" type="button">
+                <span>Do you offer incentives and support?</span>
+                <span class="ts-faq-icon">+</span>
+              </button>
+              <div class="ts-faq-answer">
+                <p>
+                  The goal is to support drivers through a clearer earning structure, easier onboarding,
+                  and a more driver-friendly experience.
+                </p>
+              </div>
+            </div>
+
+            <div class="ts-faq-item">
+              <button class="ts-faq-question" type="button">
+                <span>How can I contact Sakai?</span>
+                <span class="ts-faq-icon">+</span>
+              </button>
+              <div class="ts-faq-answer">
+                <p>
+                  You can reach out through the contact section, official social pages, or future app
+                  support channels once the platform is launched.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="ts-final-cta-col reveal">
+        <div class="ts-final-cta-card">
+          <div class="ts-final-cta-visual">
+            <img
+              src="assets/taxi-passenger.png"
+              alt="Taxi passenger and driver illustration"
+              class="ts-final-cta-image"
+            />
+
+            <h3 class="ts-final-cta-title">Ready Na Ba?</h3>
+          </div>
+
+        <div class="store-buttons reveal visible">
+          <a href="#" class="store-badge-btn app-store" aria-label="Download on the App Store">
+            <img src="assets/applestore.png" alt="Download on the App Store">
+          </a>
+
+          <a href="#" class="store-badge-btn google-play" aria-label="Get it on Google Play">
+            <img src="assets/googleplay.png" alt="Get it on Google Play">
+          </a>
+        </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  </main>
+
+  <!-- =========================================================
+    FOOTER
+  ========================================================= -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+
+      <div class="footer-brand">
+        <a href="#top" class="footer-logo-wrap" aria-label="Sakai Taksi home">
+          <img src="logo.png" alt="Sakai Taksi logo" />
+
+          <span class="footer-brand-text">
+            <span>Sakai</span>
+            <span>Taksi</span>
+          </span>
+        </a>
+
+        <p>
+          A driver-first taxi booking app made for everyday passengers and traditional Filipino taxi drivers.
+        </p>
+      </div>
+
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="#top">Home</a>
+        <a href="#why">About</a>
+        <a href="#poster">Features</a>
+        <a href="#app">App</a>
+        <a href="#content">Updates</a>
+        <a href="#faq">Contact</a>
+      </nav>
+
+      <div class="footer-side">
+        <a href="#join" class="btn btn-primary footer-cta">Book Now</a>
+
+        <p class="footer-mini">
+          © 2026 Sakai Taksi.<br />
+          All rights reserved.
+        </p>
+      </div>
+
+    </div>
+  </footer>
+  <script>
+    const revealEls = document.querySelectorAll(".reveal");
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      revealEls.forEach((el) => observer.observe(el));
+    } else {
+      revealEls.forEach((el) => el.classList.add("visible"));
+    }
+
+    document.querySelectorAll(".ts-faq-question").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = button.parentElement;
+        const isActive = item.classList.contains("active");
+
+        document.querySelectorAll(".ts-faq-item").forEach((faq) => {
+          faq.classList.remove("active");
+          const icon = faq.querySelector(".ts-faq-icon");
+          if (icon) icon.textContent = "+";
+        });
+
+        if (!isActive) {
+          item.classList.add("active");
+          const icon = item.querySelector(".ts-faq-icon");
+          if (icon) icon.textContent = "×";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
